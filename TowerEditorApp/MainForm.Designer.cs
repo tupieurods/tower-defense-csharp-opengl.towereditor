@@ -32,12 +32,18 @@
       this.BSave = new System.Windows.Forms.Button();
       this.BLoad = new System.Windows.Forms.Button();
       this.GBTowerConf = new System.Windows.Forms.GroupBox();
+      this.mTBCooldown = new System.Windows.Forms.MaskedTextBox();
+      this.LAttackColldown = new System.Windows.Forms.Label();
       this.CBTrueSight = new System.Windows.Forms.CheckBox();
       this.GBMissleColor = new System.Windows.Forms.GroupBox();
       this.PBMissleBrushColor = new System.Windows.Forms.PictureBox();
       this.PBMisslePenColor = new System.Windows.Forms.PictureBox();
       this.BSelectBrushColor = new System.Windows.Forms.Button();
       this.BSelectPenColor = new System.Windows.Forms.Button();
+      this.GBUpType = new System.Windows.Forms.GroupBox();
+      this.RBNoUp = new System.Windows.Forms.RadioButton();
+      this.RBLimitedUp = new System.Windows.Forms.RadioButton();
+      this.RBUnlimitedUp = new System.Windows.Forms.RadioButton();
       this.GBSpecialEffects = new System.Windows.Forms.GroupBox();
       this.RBNoEffect = new System.Windows.Forms.RadioButton();
       this.RBPosionEffect = new System.Windows.Forms.RadioButton();
@@ -52,6 +58,8 @@
       this.LCritChance = new System.Windows.Forms.Label();
       this.LCritMultiple = new System.Windows.Forms.Label();
       this.GBLimitedUp = new System.Windows.Forms.GroupBox();
+      this.mTBlCooldown = new System.Windows.Forms.MaskedTextBox();
+      this.LlUpCooldown = new System.Windows.Forms.Label();
       this.BlRemoveUp = new System.Windows.Forms.Button();
       this.BlAddUp = new System.Windows.Forms.Button();
       this.mTBlRadius = new System.Windows.Forms.MaskedTextBox();
@@ -63,16 +71,14 @@
       this.LlUpNewDamage = new System.Windows.Forms.Label();
       this.LlUpCost = new System.Windows.Forms.Label();
       this.GBUnlimitedUp = new System.Windows.Forms.GroupBox();
+      this.mTBuCooldown = new System.Windows.Forms.MaskedTextBox();
+      this.LuUpCooldownReduce = new System.Windows.Forms.Label();
       this.mTBuRadius = new System.Windows.Forms.MaskedTextBox();
       this.mTBuDamage = new System.Windows.Forms.MaskedTextBox();
       this.mTBuCost = new System.Windows.Forms.MaskedTextBox();
       this.LuUpAdditionalRadius = new System.Windows.Forms.Label();
       this.LuUpDamage = new System.Windows.Forms.Label();
       this.LuUpCost = new System.Windows.Forms.Label();
-      this.GBUpType = new System.Windows.Forms.GroupBox();
-      this.RBNoUp = new System.Windows.Forms.RadioButton();
-      this.RBLimitedUp = new System.Windows.Forms.RadioButton();
-      this.RBUnlimitedUp = new System.Windows.Forms.RadioButton();
       this.mTBRadius = new System.Windows.Forms.MaskedTextBox();
       this.mTBDamage = new System.Windows.Forms.MaskedTextBox();
       this.mTBCost = new System.Windows.Forms.MaskedTextBox();
@@ -83,21 +89,26 @@
       this.RBSplashTower = new System.Windows.Forms.RadioButton();
       this.RBSimpleTower = new System.Windows.Forms.RadioButton();
       this.PLoadPictures = new System.Windows.Forms.Panel();
-      this.BLoadTowerBitmap = new System.Windows.Forms.Button();
+      this.PTowerBitmap = new System.Windows.Forms.Panel();
       this.PBTowerBitmap = new System.Windows.Forms.PictureBox();
+      this.BLoadTowerBitmap = new System.Windows.Forms.Button();
       this.PBTowerIcon = new System.Windows.Forms.PictureBox();
       this.BLoadTowerIcon = new System.Windows.Forms.Button();
+      this.OFDialog = new System.Windows.Forms.OpenFileDialog();
+      this.CDSelect = new System.Windows.Forms.ColorDialog();
+      this.SFDialog = new System.Windows.Forms.SaveFileDialog();
       this.GBTowerConf.SuspendLayout();
       this.GBMissleColor.SuspendLayout();
       ((System.ComponentModel.ISupportInitialize)(this.PBMissleBrushColor)).BeginInit();
       ((System.ComponentModel.ISupportInitialize)(this.PBMisslePenColor)).BeginInit();
+      this.GBUpType.SuspendLayout();
       this.GBSpecialEffects.SuspendLayout();
       this.PCriticalStrikeSettings.SuspendLayout();
       this.GBLimitedUp.SuspendLayout();
       this.GBUnlimitedUp.SuspendLayout();
-      this.GBUpType.SuspendLayout();
       this.GBTowerType.SuspendLayout();
       this.PLoadPictures.SuspendLayout();
+      this.PTowerBitmap.SuspendLayout();
       ((System.ComponentModel.ISupportInitialize)(this.PBTowerBitmap)).BeginInit();
       ((System.ComponentModel.ISupportInitialize)(this.PBTowerIcon)).BeginInit();
       this.SuspendLayout();
@@ -114,12 +125,14 @@
       // 
       // BSave
       // 
+      this.BSave.Enabled = false;
       this.BSave.Location = new System.Drawing.Point(242, 12);
       this.BSave.Name = "BSave";
       this.BSave.Size = new System.Drawing.Size(75, 31);
       this.BSave.TabIndex = 1;
       this.BSave.Text = "Save";
       this.BSave.UseVisualStyleBackColor = true;
+      this.BSave.Click += new System.EventHandler(this.BSave_Click);
       // 
       // BLoad
       // 
@@ -129,11 +142,15 @@
       this.BLoad.TabIndex = 2;
       this.BLoad.Text = "Load";
       this.BLoad.UseVisualStyleBackColor = true;
+      this.BLoad.Click += new System.EventHandler(this.BLoad_Click);
       // 
       // GBTowerConf
       // 
+      this.GBTowerConf.Controls.Add(this.mTBCooldown);
+      this.GBTowerConf.Controls.Add(this.LAttackColldown);
       this.GBTowerConf.Controls.Add(this.CBTrueSight);
       this.GBTowerConf.Controls.Add(this.GBMissleColor);
+      this.GBTowerConf.Controls.Add(this.GBUpType);
       this.GBTowerConf.Controls.Add(this.GBSpecialEffects);
       this.GBTowerConf.Controls.Add(this.mTBNumberOfTargets);
       this.GBTowerConf.Controls.Add(this.LNumberOfTargets);
@@ -141,7 +158,6 @@
       this.GBTowerConf.Controls.Add(this.PCriticalStrikeSettings);
       this.GBTowerConf.Controls.Add(this.GBLimitedUp);
       this.GBTowerConf.Controls.Add(this.GBUnlimitedUp);
-      this.GBTowerConf.Controls.Add(this.GBUpType);
       this.GBTowerConf.Controls.Add(this.mTBRadius);
       this.GBTowerConf.Controls.Add(this.mTBDamage);
       this.GBTowerConf.Controls.Add(this.mTBCost);
@@ -153,14 +169,33 @@
       this.GBTowerConf.Enabled = false;
       this.GBTowerConf.Location = new System.Drawing.Point(12, 49);
       this.GBTowerConf.Name = "GBTowerConf";
-      this.GBTowerConf.Size = new System.Drawing.Size(950, 425);
+      this.GBTowerConf.Size = new System.Drawing.Size(950, 462);
       this.GBTowerConf.TabIndex = 3;
       this.GBTowerConf.TabStop = false;
       this.GBTowerConf.Text = "Tower configuration";
       // 
+      // mTBCooldown
+      // 
+      this.mTBCooldown.Location = new System.Drawing.Point(606, 149);
+      this.mTBCooldown.Mask = "0000";
+      this.mTBCooldown.Name = "mTBCooldown";
+      this.mTBCooldown.Size = new System.Drawing.Size(100, 29);
+      this.mTBCooldown.TabIndex = 25;
+      this.mTBCooldown.Text = "45";
+      this.mTBCooldown.TextChanged += new System.EventHandler(this.maskedTextBoxChanged);
+      // 
+      // LAttackColldown
+      // 
+      this.LAttackColldown.AutoSize = true;
+      this.LAttackColldown.Location = new System.Drawing.Point(428, 152);
+      this.LAttackColldown.Name = "LAttackColldown";
+      this.LAttackColldown.Size = new System.Drawing.Size(141, 24);
+      this.LAttackColldown.TabIndex = 24;
+      this.LAttackColldown.Text = "Attack colldown";
+      // 
       // CBTrueSight
       // 
-      this.CBTrueSight.Location = new System.Drawing.Point(582, 189);
+      this.CBTrueSight.Location = new System.Drawing.Point(255, 150);
       this.CBTrueSight.Name = "CBTrueSight";
       this.CBTrueSight.Size = new System.Drawing.Size(123, 44);
       this.CBTrueSight.TabIndex = 23;
@@ -205,6 +240,7 @@
       this.BSelectBrushColor.TabIndex = 21;
       this.BSelectBrushColor.Text = "Select brush color";
       this.BSelectBrushColor.UseVisualStyleBackColor = true;
+      this.BSelectBrushColor.Click += new System.EventHandler(this.BSelectBrushColor_Click);
       // 
       // BSelectPenColor
       // 
@@ -214,6 +250,52 @@
       this.BSelectPenColor.TabIndex = 20;
       this.BSelectPenColor.Text = "Select pen color";
       this.BSelectPenColor.UseVisualStyleBackColor = true;
+      this.BSelectPenColor.Click += new System.EventHandler(this.BSelectPenColor_Click);
+      // 
+      // GBUpType
+      // 
+      this.GBUpType.Controls.Add(this.RBNoUp);
+      this.GBUpType.Controls.Add(this.RBLimitedUp);
+      this.GBUpType.Controls.Add(this.RBUnlimitedUp);
+      this.GBUpType.Location = new System.Drawing.Point(10, 184);
+      this.GBUpType.Name = "GBUpType";
+      this.GBUpType.Size = new System.Drawing.Size(345, 98);
+      this.GBUpType.TabIndex = 12;
+      this.GBUpType.TabStop = false;
+      this.GBUpType.Tag = "2";
+      this.GBUpType.Text = "UpgradeType";
+      // 
+      // RBNoUp
+      // 
+      this.RBNoUp.Checked = true;
+      this.RBNoUp.Location = new System.Drawing.Point(194, 22);
+      this.RBNoUp.Name = "RBNoUp";
+      this.RBNoUp.Size = new System.Drawing.Size(129, 28);
+      this.RBNoUp.TabIndex = 14;
+      this.RBNoUp.TabStop = true;
+      this.RBNoUp.Text = "No upgrade";
+      this.RBNoUp.UseVisualStyleBackColor = true;
+      this.RBNoUp.Click += new System.EventHandler(this.RBNoUp_Click);
+      // 
+      // RBLimitedUp
+      // 
+      this.RBLimitedUp.Location = new System.Drawing.Point(6, 57);
+      this.RBLimitedUp.Name = "RBLimitedUp";
+      this.RBLimitedUp.Size = new System.Drawing.Size(164, 28);
+      this.RBLimitedUp.TabIndex = 13;
+      this.RBLimitedUp.Text = "Limited upgrade";
+      this.RBLimitedUp.UseVisualStyleBackColor = true;
+      this.RBLimitedUp.Click += new System.EventHandler(this.RBLimitedUp_Click);
+      // 
+      // RBUnlimitedUp
+      // 
+      this.RBUnlimitedUp.Location = new System.Drawing.Point(6, 24);
+      this.RBUnlimitedUp.Name = "RBUnlimitedUp";
+      this.RBUnlimitedUp.Size = new System.Drawing.Size(182, 28);
+      this.RBUnlimitedUp.TabIndex = 13;
+      this.RBUnlimitedUp.Text = "Unlimited upgrade";
+      this.RBUnlimitedUp.UseVisualStyleBackColor = true;
+      this.RBUnlimitedUp.Click += new System.EventHandler(this.RBUnlimitedUp_Click);
       // 
       // GBSpecialEffects
       // 
@@ -221,7 +303,7 @@
       this.GBSpecialEffects.Controls.Add(this.RBPosionEffect);
       this.GBSpecialEffects.Controls.Add(this.RBBurnEffect);
       this.GBSpecialEffects.Controls.Add(this.RBFreezeEffect);
-      this.GBSpecialEffects.Location = new System.Drawing.Point(718, 256);
+      this.GBSpecialEffects.Location = new System.Drawing.Point(718, 281);
       this.GBSpecialEffects.Name = "GBSpecialEffects";
       this.GBSpecialEffects.Size = new System.Drawing.Size(217, 109);
       this.GBSpecialEffects.TabIndex = 19;
@@ -276,7 +358,7 @@
       // 
       // mTBNumberOfTargets
       // 
-      this.mTBNumberOfTargets.Location = new System.Drawing.Point(671, 154);
+      this.mTBNumberOfTargets.Location = new System.Drawing.Point(671, 190);
       this.mTBNumberOfTargets.Mask = "00";
       this.mTBNumberOfTargets.Name = "mTBNumberOfTargets";
       this.mTBNumberOfTargets.Size = new System.Drawing.Size(35, 29);
@@ -287,7 +369,7 @@
       // LNumberOfTargets
       // 
       this.LNumberOfTargets.AutoSize = true;
-      this.LNumberOfTargets.Location = new System.Drawing.Point(428, 154);
+      this.LNumberOfTargets.Location = new System.Drawing.Point(428, 190);
       this.LNumberOfTargets.Name = "LNumberOfTargets";
       this.LNumberOfTargets.Size = new System.Drawing.Size(244, 24);
       this.LNumberOfTargets.TabIndex = 17;
@@ -357,6 +439,8 @@
       // 
       // GBLimitedUp
       // 
+      this.GBLimitedUp.Controls.Add(this.mTBlCooldown);
+      this.GBLimitedUp.Controls.Add(this.LlUpCooldown);
       this.GBLimitedUp.Controls.Add(this.BlRemoveUp);
       this.GBLimitedUp.Controls.Add(this.BlAddUp);
       this.GBLimitedUp.Controls.Add(this.mTBlRadius);
@@ -368,12 +452,31 @@
       this.GBLimitedUp.Controls.Add(this.LlUpNewDamage);
       this.GBLimitedUp.Controls.Add(this.LlUpCost);
       this.GBLimitedUp.Enabled = false;
-      this.GBLimitedUp.Location = new System.Drawing.Point(364, 245);
+      this.GBLimitedUp.Location = new System.Drawing.Point(361, 241);
       this.GBLimitedUp.Name = "GBLimitedUp";
-      this.GBLimitedUp.Size = new System.Drawing.Size(348, 175);
+      this.GBLimitedUp.Size = new System.Drawing.Size(348, 215);
       this.GBLimitedUp.TabIndex = 14;
       this.GBLimitedUp.TabStop = false;
       this.GBLimitedUp.Text = "Limited upgrade 0/0";
+      // 
+      // mTBlCooldown
+      // 
+      this.mTBlCooldown.Location = new System.Drawing.Point(152, 131);
+      this.mTBlCooldown.Mask = "0000";
+      this.mTBlCooldown.Name = "mTBlCooldown";
+      this.mTBlCooldown.Size = new System.Drawing.Size(100, 29);
+      this.mTBlCooldown.TabIndex = 14;
+      this.mTBlCooldown.Text = "45";
+      this.mTBlCooldown.TextChanged += new System.EventHandler(this.maskedTextBoxChanged);
+      // 
+      // LlUpCooldown
+      // 
+      this.LlUpCooldown.AutoSize = true;
+      this.LlUpCooldown.Location = new System.Drawing.Point(6, 134);
+      this.LlUpCooldown.Name = "LlUpCooldown";
+      this.LlUpCooldown.Size = new System.Drawing.Size(140, 24);
+      this.LlUpCooldown.TabIndex = 13;
+      this.LlUpCooldown.Text = "New Cooldown";
       // 
       // BlRemoveUp
       // 
@@ -384,6 +487,7 @@
       this.BlRemoveUp.TabIndex = 12;
       this.BlRemoveUp.Text = "Remove";
       this.BlRemoveUp.UseVisualStyleBackColor = true;
+      this.BlRemoveUp.Click += new System.EventHandler(this.BlRemoveUp_Click);
       // 
       // BlAddUp
       // 
@@ -393,6 +497,7 @@
       this.BlAddUp.TabIndex = 11;
       this.BlAddUp.Text = "Add";
       this.BlAddUp.UseVisualStyleBackColor = true;
+      this.BlAddUp.Click += new System.EventHandler(this.BlAddUp_Click);
       // 
       // mTBlRadius
       // 
@@ -429,31 +534,33 @@
       // BlNextUp
       // 
       this.BlNextUp.Enabled = false;
-      this.BlNextUp.Location = new System.Drawing.Point(185, 133);
+      this.BlNextUp.Location = new System.Drawing.Point(184, 173);
       this.BlNextUp.Name = "BlNextUp";
       this.BlNextUp.Size = new System.Drawing.Size(157, 36);
       this.BlNextUp.TabIndex = 7;
       this.BlNextUp.Text = "Next upgrade";
       this.BlNextUp.UseVisualStyleBackColor = true;
+      this.BlNextUp.Click += new System.EventHandler(this.BlNextUp_Click);
       // 
       // BlPreviousUp
       // 
       this.BlPreviousUp.Enabled = false;
-      this.BlPreviousUp.Location = new System.Drawing.Point(6, 133);
+      this.BlPreviousUp.Location = new System.Drawing.Point(6, 173);
       this.BlPreviousUp.Name = "BlPreviousUp";
       this.BlPreviousUp.Size = new System.Drawing.Size(173, 36);
       this.BlPreviousUp.TabIndex = 6;
       this.BlPreviousUp.Text = "Previous upgrade";
       this.BlPreviousUp.UseVisualStyleBackColor = true;
+      this.BlPreviousUp.Click += new System.EventHandler(this.BlPreviousUp_Click);
       // 
       // LlUpNewRadius
       // 
       this.LlUpNewRadius.AutoSize = true;
       this.LlUpNewRadius.Location = new System.Drawing.Point(6, 103);
       this.LlUpNewRadius.Name = "LlUpNewRadius";
-      this.LlUpNewRadius.Size = new System.Drawing.Size(105, 24);
+      this.LlUpNewRadius.Size = new System.Drawing.Size(112, 24);
       this.LlUpNewRadius.TabIndex = 5;
-      this.LlUpNewRadius.Text = "New radius";
+      this.LlUpNewRadius.Text = "New Radius";
       // 
       // LlUpNewDamage
       // 
@@ -475,6 +582,8 @@
       // 
       // GBUnlimitedUp
       // 
+      this.GBUnlimitedUp.Controls.Add(this.mTBuCooldown);
+      this.GBUnlimitedUp.Controls.Add(this.LuUpCooldownReduce);
       this.GBUnlimitedUp.Controls.Add(this.mTBuRadius);
       this.GBUnlimitedUp.Controls.Add(this.mTBuDamage);
       this.GBUnlimitedUp.Controls.Add(this.mTBuCost);
@@ -482,12 +591,31 @@
       this.GBUnlimitedUp.Controls.Add(this.LuUpDamage);
       this.GBUnlimitedUp.Controls.Add(this.LuUpCost);
       this.GBUnlimitedUp.Enabled = false;
-      this.GBUnlimitedUp.Location = new System.Drawing.Point(6, 245);
+      this.GBUnlimitedUp.Location = new System.Drawing.Point(6, 281);
       this.GBUnlimitedUp.Name = "GBUnlimitedUp";
       this.GBUnlimitedUp.Size = new System.Drawing.Size(352, 175);
       this.GBUnlimitedUp.TabIndex = 13;
       this.GBUnlimitedUp.TabStop = false;
       this.GBUnlimitedUp.Text = "Unlimited upgrade";
+      // 
+      // mTBuCooldown
+      // 
+      this.mTBuCooldown.Location = new System.Drawing.Point(249, 128);
+      this.mTBuCooldown.Mask = "0000";
+      this.mTBuCooldown.Name = "mTBuCooldown";
+      this.mTBuCooldown.Size = new System.Drawing.Size(100, 29);
+      this.mTBuCooldown.TabIndex = 15;
+      this.mTBuCooldown.Text = "0";
+      this.mTBuCooldown.TextChanged += new System.EventHandler(this.maskedTextBoxChanged);
+      // 
+      // LuUpCooldownReduce
+      // 
+      this.LuUpCooldownReduce.AutoSize = true;
+      this.LuUpCooldownReduce.Location = new System.Drawing.Point(6, 131);
+      this.LuUpCooldownReduce.Name = "LuUpCooldownReduce";
+      this.LuUpCooldownReduce.Size = new System.Drawing.Size(228, 24);
+      this.LuUpCooldownReduce.TabIndex = 14;
+      this.LuUpCooldownReduce.Text = "Attack cooldown reducing";
       // 
       // mTBuRadius
       // 
@@ -547,51 +675,6 @@
       this.LuUpCost.Size = new System.Drawing.Size(122, 24);
       this.LuUpCost.TabIndex = 0;
       this.LuUpCost.Text = "Upgrade cost";
-      // 
-      // GBUpType
-      // 
-      this.GBUpType.Controls.Add(this.RBNoUp);
-      this.GBUpType.Controls.Add(this.RBLimitedUp);
-      this.GBUpType.Controls.Add(this.RBUnlimitedUp);
-      this.GBUpType.Location = new System.Drawing.Point(6, 181);
-      this.GBUpType.Name = "GBUpType";
-      this.GBUpType.Size = new System.Drawing.Size(501, 58);
-      this.GBUpType.TabIndex = 12;
-      this.GBUpType.TabStop = false;
-      this.GBUpType.Tag = "2";
-      this.GBUpType.Text = "UpgradeType";
-      // 
-      // RBNoUp
-      // 
-      this.RBNoUp.Checked = true;
-      this.RBNoUp.Location = new System.Drawing.Point(357, 24);
-      this.RBNoUp.Name = "RBNoUp";
-      this.RBNoUp.Size = new System.Drawing.Size(129, 28);
-      this.RBNoUp.TabIndex = 14;
-      this.RBNoUp.TabStop = true;
-      this.RBNoUp.Text = "No upgrade";
-      this.RBNoUp.UseVisualStyleBackColor = true;
-      this.RBNoUp.Click += new System.EventHandler(this.RBNoUp_Click);
-      // 
-      // RBLimitedUp
-      // 
-      this.RBLimitedUp.Location = new System.Drawing.Point(194, 24);
-      this.RBLimitedUp.Name = "RBLimitedUp";
-      this.RBLimitedUp.Size = new System.Drawing.Size(164, 28);
-      this.RBLimitedUp.TabIndex = 13;
-      this.RBLimitedUp.Text = "Limited upgrade";
-      this.RBLimitedUp.UseVisualStyleBackColor = true;
-      this.RBLimitedUp.Click += new System.EventHandler(this.RBLimitedUp_Click);
-      // 
-      // RBUnlimitedUp
-      // 
-      this.RBUnlimitedUp.Location = new System.Drawing.Point(6, 24);
-      this.RBUnlimitedUp.Name = "RBUnlimitedUp";
-      this.RBUnlimitedUp.Size = new System.Drawing.Size(182, 28);
-      this.RBUnlimitedUp.TabIndex = 13;
-      this.RBUnlimitedUp.Text = "Unlimited upgrade";
-      this.RBUnlimitedUp.UseVisualStyleBackColor = true;
-      this.RBUnlimitedUp.Click += new System.EventHandler(this.RBUnlimitedUp_Click);
       // 
       // mTBRadius
       // 
@@ -690,54 +773,69 @@
       // PLoadPictures
       // 
       this.PLoadPictures.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+      this.PLoadPictures.Controls.Add(this.PTowerBitmap);
       this.PLoadPictures.Controls.Add(this.BLoadTowerBitmap);
-      this.PLoadPictures.Controls.Add(this.PBTowerBitmap);
       this.PLoadPictures.Controls.Add(this.PBTowerIcon);
       this.PLoadPictures.Controls.Add(this.BLoadTowerIcon);
       this.PLoadPictures.Location = new System.Drawing.Point(6, 28);
       this.PLoadPictures.Name = "PLoadPictures";
-      this.PLoadPictures.Size = new System.Drawing.Size(243, 121);
+      this.PLoadPictures.Size = new System.Drawing.Size(243, 150);
       this.PLoadPictures.TabIndex = 4;
       // 
-      // BLoadTowerBitmap
+      // PTowerBitmap
       // 
-      this.BLoadTowerBitmap.Location = new System.Drawing.Point(3, 79);
-      this.BLoadTowerBitmap.Name = "BLoadTowerBitmap";
-      this.BLoadTowerBitmap.Size = new System.Drawing.Size(177, 32);
-      this.BLoadTowerBitmap.TabIndex = 1;
-      this.BLoadTowerBitmap.Text = "Load tower bitmap";
-      this.BLoadTowerBitmap.UseVisualStyleBackColor = true;
+      this.PTowerBitmap.AutoScroll = true;
+      this.PTowerBitmap.Controls.Add(this.PBTowerBitmap);
+      this.PTowerBitmap.Location = new System.Drawing.Point(84, 61);
+      this.PTowerBitmap.Name = "PTowerBitmap";
+      this.PTowerBitmap.Size = new System.Drawing.Size(149, 84);
+      this.PTowerBitmap.TabIndex = 4;
       // 
       // PBTowerBitmap
       // 
-      this.PBTowerBitmap.Location = new System.Drawing.Point(186, 81);
+      this.PBTowerBitmap.Location = new System.Drawing.Point(3, 3);
       this.PBTowerBitmap.Name = "PBTowerBitmap";
-      this.PBTowerBitmap.Size = new System.Drawing.Size(30, 30);
+      this.PBTowerBitmap.Size = new System.Drawing.Size(143, 78);
       this.PBTowerBitmap.TabIndex = 2;
       this.PBTowerBitmap.TabStop = false;
+      // 
+      // BLoadTowerBitmap
+      // 
+      this.BLoadTowerBitmap.Location = new System.Drawing.Point(3, 58);
+      this.BLoadTowerBitmap.Name = "BLoadTowerBitmap";
+      this.BLoadTowerBitmap.Size = new System.Drawing.Size(75, 87);
+      this.BLoadTowerBitmap.TabIndex = 1;
+      this.BLoadTowerBitmap.Text = "Load tower bitmap";
+      this.BLoadTowerBitmap.UseVisualStyleBackColor = true;
+      this.BLoadTowerBitmap.Click += new System.EventHandler(this.BLoadTowerBitmap_Click);
       // 
       // PBTowerIcon
       // 
       this.PBTowerIcon.Location = new System.Drawing.Point(163, 3);
       this.PBTowerIcon.Name = "PBTowerIcon";
-      this.PBTowerIcon.Size = new System.Drawing.Size(70, 70);
+      this.PBTowerIcon.Size = new System.Drawing.Size(70, 52);
       this.PBTowerIcon.TabIndex = 3;
       this.PBTowerIcon.TabStop = false;
       // 
       // BLoadTowerIcon
       // 
-      this.BLoadTowerIcon.Location = new System.Drawing.Point(3, 23);
+      this.BLoadTowerIcon.Location = new System.Drawing.Point(3, 3);
       this.BLoadTowerIcon.Name = "BLoadTowerIcon";
-      this.BLoadTowerIcon.Size = new System.Drawing.Size(154, 32);
+      this.BLoadTowerIcon.Size = new System.Drawing.Size(154, 31);
       this.BLoadTowerIcon.TabIndex = 0;
       this.BLoadTowerIcon.Text = "Load tower icon";
       this.BLoadTowerIcon.UseVisualStyleBackColor = true;
+      this.BLoadTowerIcon.Click += new System.EventHandler(this.BLoadTowerIcon_Click);
+      // 
+      // OFDialog
+      // 
+      this.OFDialog.FileName = "*.*";
       // 
       // MainForm
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 24F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-      this.ClientSize = new System.Drawing.Size(968, 485);
+      this.ClientSize = new System.Drawing.Size(968, 523);
       this.Controls.Add(this.GBTowerConf);
       this.Controls.Add(this.BLoad);
       this.Controls.Add(this.BSave);
@@ -751,6 +849,7 @@
       this.GBMissleColor.ResumeLayout(false);
       ((System.ComponentModel.ISupportInitialize)(this.PBMissleBrushColor)).EndInit();
       ((System.ComponentModel.ISupportInitialize)(this.PBMisslePenColor)).EndInit();
+      this.GBUpType.ResumeLayout(false);
       this.GBSpecialEffects.ResumeLayout(false);
       this.PCriticalStrikeSettings.ResumeLayout(false);
       this.PCriticalStrikeSettings.PerformLayout();
@@ -758,9 +857,9 @@
       this.GBLimitedUp.PerformLayout();
       this.GBUnlimitedUp.ResumeLayout(false);
       this.GBUnlimitedUp.PerformLayout();
-      this.GBUpType.ResumeLayout(false);
       this.GBTowerType.ResumeLayout(false);
       this.PLoadPictures.ResumeLayout(false);
+      this.PTowerBitmap.ResumeLayout(false);
       ((System.ComponentModel.ISupportInitialize)(this.PBTowerBitmap)).EndInit();
       ((System.ComponentModel.ISupportInitialize)(this.PBTowerIcon)).EndInit();
       this.ResumeLayout(false);
@@ -828,6 +927,16 @@
     private System.Windows.Forms.RadioButton RBBurnEffect;
     private System.Windows.Forms.RadioButton RBFreezeEffect;
     private System.Windows.Forms.RadioButton RBNoEffect;
+    private System.Windows.Forms.OpenFileDialog OFDialog;
+    private System.Windows.Forms.Panel PTowerBitmap;
+    private System.Windows.Forms.ColorDialog CDSelect;
+    private System.Windows.Forms.MaskedTextBox mTBCooldown;
+    private System.Windows.Forms.Label LAttackColldown;
+    private System.Windows.Forms.MaskedTextBox mTBuCooldown;
+    private System.Windows.Forms.Label LuUpCooldownReduce;
+    private System.Windows.Forms.Label LlUpCooldown;
+    private System.Windows.Forms.MaskedTextBox mTBlCooldown;
+    private System.Windows.Forms.SaveFileDialog SFDialog;
   }
 }
 
