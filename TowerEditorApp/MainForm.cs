@@ -558,6 +558,8 @@ namespace TowerEditorApp
           break;
       }
       CurrentUpLevel = -1;
+      GBLimitedUp.Enabled = false;
+      GBUnlimitedUp.Enabled = false;
       if (TowerConfig.UnlimitedUp)//Тип обновления - бесконечный
       {
         RBUnlimitedUp.Checked = true;
