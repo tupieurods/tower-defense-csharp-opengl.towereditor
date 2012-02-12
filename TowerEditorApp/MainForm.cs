@@ -13,7 +13,7 @@ namespace TowerEditorApp
   public partial class MainForm : Form
   {
 
-    private sTowerParam TowerConfig;
+    private TowerParam TowerConfig;
     private int CurrentUpLevel = -1;
     private bool RealChange = true;
 
@@ -491,7 +491,7 @@ namespace TowerEditorApp
         {
           FileStream TowerConfLoadStream = new FileStream(OFDialog.FileName, FileMode.Open, FileAccess.Read);
           IFormatter Formatter = new BinaryFormatter();
-          TowerConfig = (sTowerParam)Formatter.Deserialize(TowerConfLoadStream);
+          TowerConfig = (TowerParam)Formatter.Deserialize(TowerConfLoadStream);
           TowerConfLoadStream.Close();
           SetParams();
         }
@@ -506,7 +506,7 @@ namespace TowerEditorApp
     //Создание новой башни
     private void BNewTowerConf_Click(object sender, EventArgs e)
     {
-      TowerConfig = sTowerParam.CreateDefault();
+      TowerConfig = new TowerParam();
       SetParams();
     }
 
@@ -639,6 +639,11 @@ namespace TowerEditorApp
       AddValue.Cost = TowerConfig.UpgradeParams[0].Cost;//По умолчанию стоимость для нового уровня и урон равны
       //базовым значениям
       AddValue.Damage = TowerConfig.UpgradeParams[0].Damage;
+      #region Пока не изменяется с уровнем, чтобы не переписывать TTower если понадобится перепишем лишь редактор
+      AddValue.CritChance = TowerConfig.UpgradeParams[0].CritChance;
+      AddValue.CritMultiple = TowerConfig.UpgradeParams[0].CritMultiple;
+      AddValue.NumberOfTargets = TowerConfig.UpgradeParams[0].NumberOfTargets;
+      #endregion
       TowerConfig.UpgradeParams.Insert(InsertPos, AddValue);
     }
 
