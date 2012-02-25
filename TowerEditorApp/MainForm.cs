@@ -577,6 +577,12 @@ namespace TowerEditorApp
         RBLimitedUp.Checked = true;
         GBLimitedUp.Enabled = true;
         GBUpType.Tag = 1;
+        if (TowerConfig.UpgradeParams.Count > 2)
+        {
+          BlNextUp.Enabled = true;
+          BlPreviousUp.Enabled = true;
+          BlRemoveUp.Enabled = true;
+        }
         LimitedShow(CurrentUpLevel = 1);
       }
       switch (TowerConfig.TowerType)//Тип башни
