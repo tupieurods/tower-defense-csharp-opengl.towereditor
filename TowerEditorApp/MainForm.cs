@@ -8,6 +8,7 @@ using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using GameCoClassLibrary;
 using GameCoClassLibrary.Enums;
+using GameCoClassLibrary.Structures;
 
 namespace TowerEditorApp
 {
@@ -467,17 +468,22 @@ namespace TowerEditorApp
       SFDialog.Filter = "Файл конфигурации башни|*.tdtc";
       if (SFDialog.ShowDialog() == DialogResult.OK)
       {
-        try
+        using (FileStream TowerConfSaveStream = new FileStream(SFDialog.FileName, FileMode.Create, FileAccess.Write))
         {
-          FileStream TowerConfSaveStream = new FileStream(SFDialog.FileName, FileMode.Create, FileAccess.Write);
-          IFormatter Formatter = new BinaryFormatter();
-          Formatter.Serialize(TowerConfSaveStream, TowerConfig);
+          try
+          {
+            IFormatter Formatter = new BinaryFormatter();
+            Formatter.Serialize(TowerConfSaveStream, TowerConfig);
+          }
+          catch (Exception Exc)
+          {
+            MessageBox.Show("Невохможно сохранить конфигурацию: \n" + Exc.Message);
+          }
+        }
+        /*finally
+        {
           TowerConfSaveStream.Close();
-        }
-        catch (Exception Exc)
-        {
-          MessageBox.Show("Невохможно сохранить конфигурацию: \n" + Exc.Message);
-        }
+        }*/
       }
     }
 
@@ -488,17 +494,18 @@ namespace TowerEditorApp
       OFDialog.Filter = "Файл конфигурации башни|*.tdtc";
       if (OFDialog.ShowDialog() == DialogResult.OK)
       {
-        try
+        using (FileStream TowerConfLoadStream = new FileStream(OFDialog.FileName, FileMode.Open, FileAccess.Read))
         {
-          FileStream TowerConfLoadStream = new FileStream(OFDialog.FileName, FileMode.Open, FileAccess.Read);
-          IFormatter Formatter = new BinaryFormatter();
-          TowerConfig = (TowerParam)Formatter.Deserialize(TowerConfLoadStream);
-          TowerConfLoadStream.Close();
-          SetParams();
-        }
-        catch (Exception Exc)
-        {
-          MessageBox.Show("Невохможно загрузить конфигурацию: \n" + Exc.Message);
+          try
+          {
+            IFormatter Formatter = new BinaryFormatter();
+            TowerConfig = (TowerParam)Formatter.Deserialize(TowerConfLoadStream);
+            SetParams();
+          }
+          catch (Exception Exc)
+          {
+            MessageBox.Show("Невохможно загрузить конфигурацию: \n" + Exc.Message);
+          }
         }
       }
     }
