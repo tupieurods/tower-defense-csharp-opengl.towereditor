@@ -114,4 +114,13 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="Update_type_changing">
+    <value xml:space="preserve">Do you really want change update type?</value>
+  </data>
+  <data name="WarningCaption">
+    <value xml:space="preserve">Warning</value>
+  </data>
+  <data name="LimitedUpgradeDefaultTitle">
+    <value xml:space="preserve">Limited upgrade 0/0</value>
+  </data>
 </root>

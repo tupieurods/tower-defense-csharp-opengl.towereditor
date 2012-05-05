@@ -1,45 +1,80 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Windows.Forms;
+using System.Globalization;
 using System.IO;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
-using GameCoClassLibrary;
+using System.Windows.Forms;
 using GameCoClassLibrary.Enums;
 using GameCoClassLibrary.Structures;
+using TowerEditorApp.Properties;
 
 namespace TowerEditorApp
 {
   public partial class MainForm : Form
   {
 
+    /// <summary>
+    /// Tower configuration
+    /// </summary>
     private TowerParam TowerConfig;
+    /// <summary>
+    /// Current upgrading level
+    /// </summary>
     private int CurrentUpLevel = -1;
+    /// <summary>
+    /// True: Parameter was changed by user, needs saving
+    /// False: Parametr was changed by program, doesn't need saving
+    /// </summary>
     private bool RealChange = true;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="MainForm"/> class.
+    /// </summary>
     public MainForm()
     {
       InitializeComponent();
     }
 
-    #region Переключение типов улучшений
-    //В будущем переделать переключение, убрать дублирование кода
+    #region Upgrade type switching
+    //need some testing, UpgradingTypePostswitching method created as DRY on CodeReview
+    /// <summary>
+    /// Actions after succesfull upgrading type switching.
+    /// </summary>
+    /// <param name="upType">Up type.</param>
+    /// <param name="unlimitedUpToConfig">Sets upgrading type</param>
+    /// <param name="GBUnlimited">Sets Unlimited Group Box enabled or not</param>
+    /// <param name="GBLimited">Sets Limited Group Box enabled or not.</param>
+    private void UpgradingTypePostswitching(UpgradeType upType, bool unlimitedUpToConfig, bool GBUnlimited, bool GBLimited)
+    {
+      GBUpType.Tag = (int)upType;
+      TowerConfig.UpgradeParams.RemoveRange(1, TowerConfig.UpgradeParams.Count - 1);
+      GBLimitedUp.Text = Resources.LimitedUpgradeDefaultTitle;
+      CurrentUpLevel = -1;
+      TowerConfig.UnlimitedUp = unlimitedUpToConfig;
+      GBUnlimitedUp.Enabled = GBUnlimited;
+      GBLimitedUp.Enabled = GBLimited;
+    }
+
+    /// <summary>
+    /// Switching to the unlimited type of tower upgrading
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
     private void RBUnlimitedUp_Click(object sender, EventArgs e)
     {
-      if (TowerConfig.UpgradeParams.Count > 1)//Если переключились с другого типа обновления и там уже что-то добавили
+      if (TowerConfig.UpgradeParams.Count > 1)//Switching from another upgrading type
       {
         if ((int)GBUpType.Tag != 0)
         {
-          if (MessageBox.Show("Do you really want change update type?", "Warning", MessageBoxButtons.YesNo) != DialogResult.Yes)//Если ошибочно нажали
+          if (MessageBox.Show(Resources.Update_type_changing, Resources.WarningCaption, MessageBoxButtons.YesNo) != DialogResult.Yes)//May be user missclicked, check this
           {
-            switch ((int)GBUpType.Tag)
+            switch ((UpgradeType)Convert.ToInt32(GBUpType.Tag))
             {
-              case 1:
+              case UpgradeType.Limited:
                 RBLimitedUp.Checked = true;
                 break;
-              case 2:
+              case UpgradeType.NoUp:
                 RBNoUp.Checked = true;
                 break;
             }
@@ -49,32 +84,30 @@ namespace TowerEditorApp
         else
           return;
       }
-      GBUpType.Tag = 0;//Какой тип обновления выбран
-      TowerConfig.UpgradeParams.RemoveRange(1, TowerConfig.UpgradeParams.Count - 1);//Удалили все старые обновления
-      //если мы дошли до сюда, значит пользователь смирился с потерей своих наработок
-      GBLimitedUp.Text = "Limited upgrade 0/0";
+      UpgradingTypePostswitching(UpgradeType.Unlimited, true, true, false);
       AddNewUpLevel();
       UnlimitedShow();
-      CurrentUpLevel = -1;
-      TowerConfig.UnlimitedUp = true;
-      GBUnlimitedUp.Enabled = true;
-      GBLimitedUp.Enabled = false;//Чтобы не возникло путаницы
     }
 
+    /// <summary>
+    /// Switching to the limited type of tower upgrading
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
     private void RBLimitedUp_Click(object sender, EventArgs e)
     {
-      if (TowerConfig.UpgradeParams.Count > 1)//Если переключились с другого типа обновления и там уже что-то добавили
+      if (TowerConfig.UpgradeParams.Count > 1)//Switching from another upgrading type
       {
         if ((int)GBUpType.Tag != 1)
         {
-          if (MessageBox.Show("Do you really want change update type?", "Warning", MessageBoxButtons.YesNo) != DialogResult.Yes)//Если ошибочно нажали
+          if (MessageBox.Show(Resources.Update_type_changing, Resources.WarningCaption, MessageBoxButtons.YesNo) != DialogResult.Yes)//May be user missclicked, check this
           {
-            switch ((int)GBUpType.Tag)
+            switch ((UpgradeType)Convert.ToInt32(GBUpType.Tag))
             {
-              case 0:
+              case UpgradeType.Unlimited:
                 RBUnlimitedUp.Checked = true;
                 break;
-              case 2:
+              case UpgradeType.NoUp:
                 RBNoUp.Checked = true;
                 break;
             }
@@ -84,30 +117,28 @@ namespace TowerEditorApp
         else
           return;
       }
-      GBUpType.Tag = 1;//Какой тип обновления выбран
-      TowerConfig.UpgradeParams.RemoveRange(1, TowerConfig.UpgradeParams.Count - 1);//Удалили все старые обновления
-      //если мы дошли до сюда, значит пользователь смирился с потерей своих наработок
-      GBLimitedUp.Text = "Limited upgrade 0/0";
-      CurrentUpLevel = -1;
-      TowerConfig.UnlimitedUp = false;
-      GBUnlimitedUp.Enabled = false;
-      GBLimitedUp.Enabled = true;
+      UpgradingTypePostswitching(UpgradeType.Limited, false, false, true);
     }
 
+    /// <summary>
+    /// Switching to the type of tower without any upgrade
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
     private void RBNoUp_Click(object sender, EventArgs e)
     {
-      if (TowerConfig.UpgradeParams.Count > 1)//Если переключились с другого типа обновления и там уже что-то добавили
+      if (TowerConfig.UpgradeParams.Count > 1)//Switching from another upgrading type
       {
         if ((int)GBUpType.Tag != 2)
         {
-          if (MessageBox.Show("Do you really want change update type?", "Warning", MessageBoxButtons.YesNo) != DialogResult.Yes)//Если ошибочно нажали
+          if (MessageBox.Show(Resources.Update_type_changing, Resources.WarningCaption, MessageBoxButtons.YesNo) != DialogResult.Yes)//May be user missclicked, check this
           {
-            switch ((int)GBUpType.Tag)
+            switch ((UpgradeType)Convert.ToInt32(GBUpType.Tag))
             {
-              case 0:
+              case UpgradeType.Unlimited:
                 RBUnlimitedUp.Checked = true;
                 break;
-              case 1:
+              case UpgradeType.Limited:
                 RBLimitedUp.Checked = true;
                 break;
             }
@@ -117,18 +148,14 @@ namespace TowerEditorApp
         else
           return;
       }
-      GBUpType.Tag = 2;
-      TowerConfig.UpgradeParams.RemoveRange(1, TowerConfig.UpgradeParams.Count - 1);//Удалили все старые обновления
-      //если мы дошли до сюда, значит пользователь смирился с потерей своих наработок
-      GBLimitedUp.Text = "Limited upgrade 0/0";
-      CurrentUpLevel = -1;
-      TowerConfig.UnlimitedUp = false;
-      GBUnlimitedUp.Enabled = false;
-      GBLimitedUp.Enabled = false;
+      UpgradingTypePostswitching(UpgradeType.NoUp, false, false, false);
     }
     #endregion
 
-    #region Показ параметров обновления
+    #region Show upgrading settings
+    /// <summary>
+    /// Unlimited upgrading showing
+    /// </summary>
     public void UnlimitedShow()
     {
       if (TowerConfig.UpgradeParams.Count == 1)
@@ -136,31 +163,39 @@ namespace TowerEditorApp
         MessageBox.Show("Wrong \"UnlimitedShow()\" method  using");
         return;
       }
-      mTBuCost.Text = TowerConfig.UpgradeParams[1].Cost.ToString();
-      mTBuDamage.Text = TowerConfig.UpgradeParams[1].Damage.ToString();
-      mTBuRadius.Text = TowerConfig.UpgradeParams[1].AttackRadius.ToString();
-      mTBuCooldown.Text = TowerConfig.UpgradeParams[1].Cooldown.ToString();
+      mTBuCost.Text = TowerConfig.UpgradeParams[1].Cost.ToString(CultureInfo.InvariantCulture);
+      mTBuDamage.Text = TowerConfig.UpgradeParams[1].Damage.ToString(CultureInfo.InvariantCulture);
+      mTBuRadius.Text = TowerConfig.UpgradeParams[1].AttackRadius.ToString(CultureInfo.InvariantCulture);
+      mTBuCooldown.Text = TowerConfig.UpgradeParams[1].Cooldown.ToString(CultureInfo.InvariantCulture);
     }
 
+    /// <summary>
+    /// Limited upgrading showing
+    /// </summary>
+    /// <param name="ShowLevel">Number of level of upgrade</param>
     public void LimitedShow(int ShowLevel)
     {
       if (ShowLevel >= TowerConfig.UpgradeParams.Count)
         return;
-      mTBlCost.Text = TowerConfig.UpgradeParams[ShowLevel].Cost.ToString();
+      mTBlCost.Text = TowerConfig.UpgradeParams[ShowLevel].Cost.ToString(CultureInfo.InvariantCulture);
       //MessageBox.Show(ShowLevel.ToString()+"\n"+TowerConfig.UpgradeParams[ShowLevel].Cost.ToString());
-      mTBlDamage.Text = TowerConfig.UpgradeParams[ShowLevel].Damage.ToString();
-      mTBlRadius.Text = TowerConfig.UpgradeParams[ShowLevel].AttackRadius.ToString();
-      mTBlCooldown.Text = TowerConfig.UpgradeParams[ShowLevel].Cooldown.ToString();
-      GBLimitedUp.Text = "Limited upgrade " + CurrentUpLevel.ToString() + "/" + (TowerConfig.UpgradeParams.Count - 1).ToString();
+      mTBlDamage.Text = TowerConfig.UpgradeParams[ShowLevel].Damage.ToString(CultureInfo.InvariantCulture);
+      mTBlRadius.Text = TowerConfig.UpgradeParams[ShowLevel].AttackRadius.ToString(CultureInfo.InvariantCulture);
+      mTBlCooldown.Text = TowerConfig.UpgradeParams[ShowLevel].Cooldown.ToString(CultureInfo.InvariantCulture);
+      GBLimitedUp.Text = "Limited upgrade " + CurrentUpLevel.ToString(CultureInfo.InvariantCulture) + "/" + (TowerConfig.UpgradeParams.Count - 1).ToString(CultureInfo.InvariantCulture);
     }
     #endregion
 
-    #region Ввод текстовых данных
-    //Фильтрация ввода в TextBox со значением множителя CriticalStrike
+    #region Text settings checking
+    /// <summary>
+    /// Critical strike multiplie checking
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="System.Windows.Forms.KeyPressEventArgs"/> instance containing the event data.</param>
     private void TBCritMultiple_KeyPress(object sender, KeyPressEventArgs e)
     {
       if ((e.KeyChar == '.') &&
-            ((TBCritMultiple.Text.Length == 0) || (TBCritMultiple.MaxLength - TBCritMultiple.Text.Length == 1) || (TBCritMultiple.Text.IndexOf(".") != -1)))
+            ((TBCritMultiple.Text.Length == 0) || (TBCritMultiple.MaxLength - TBCritMultiple.Text.Length == 1) || (TBCritMultiple.Text.IndexOf(".", StringComparison.Ordinal) != -1)))
       {
         if (!(Char.IsDigit(e.KeyChar)) || (e.KeyChar != (char)Keys.Back))
         {
@@ -169,24 +204,32 @@ namespace TowerEditorApp
       }
     }
 
-    //Проверка множителя критического удара
+    /// <summary>
+    /// Critical strike multiplie checking and setting
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
     private void TBCritMultiple_TextChanged(object sender, EventArgs e)
     {
-      if (((sender as TextBox).Text == string.Empty) || (!RealChange))
+      if ((TBCritMultiple.Text == string.Empty) || (!RealChange))
         return;
-      sMainTowerParam Tmp = TowerConfig.UpgradeParams[GetIndexByName((sender as TextBox).Name)];
+      sMainTowerParam Tmp = TowerConfig.UpgradeParams[GetIndexByName(TBCritMultiple.Name)];
       object TmpValue = Tmp.CritMultiple;
-      ValidateAndChange((sender as TextBox).Text, ref TmpValue);
+      ValidateAndChange(TBCritMultiple.Text, ref TmpValue);
       Tmp.CritMultiple = (double)TmpValue;
-      TowerConfig.UpgradeParams[GetIndexByName((sender as TextBox).Name)] = Tmp;
+      TowerConfig.UpgradeParams[GetIndexByName(TBCritMultiple.Name)] = Tmp;
     }
 
-    //Изменение текста в TextBox'ах, задающих параметры
+    /// <summary>
+    /// Masked text boxes changed.
+    /// </summary>
+    /// <param name="sender">The sender.</param>
+    /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
     private void maskedTextBoxChanged(object sender, EventArgs e)
     {
       if ((sender as MaskedTextBox) == null)
       {
-        MessageBox.Show("BAD BAD BAD programmer again! Used metod incorrect. KILL HIM");
+        MessageBox.Show("BAD BAD BAD programmer again! The method is used incorrectly.");
         return;
       }
       if (((sender as MaskedTextBox).Text == string.Empty) || (!RealChange))
@@ -194,12 +237,12 @@ namespace TowerEditorApp
       int index = GetIndexByName((sender as MaskedTextBox).Name);
       if (index == -1)
         return;
-      #region Изменение значения
+      #region Value changing
       sMainTowerParam Tmp = TowerConfig.UpgradeParams[index];
       object TmpValue;
       switch ((sender as MaskedTextBox).Name)
       {
-        #region Стоимость
+        #region Tower Cost(and for upgrading too)
         case "mTBCost":
         case "mTBlCost":
         case "mTBuCost":
@@ -208,7 +251,7 @@ namespace TowerEditorApp
           Tmp.Cost = (int)TmpValue;
           break;
         #endregion
-        #region Урон
+        #region Damdage(and for upgrading too)
         case "mTBDamage":
         case "mTBlDamage":
         case "mTBuDamage":
@@ -217,7 +260,7 @@ namespace TowerEditorApp
           Tmp.Damage = (int)TmpValue;
           break;
         #endregion
-        #region Радиус атаки
+        #region Attack radius(and for upgrading too)
         case "mTBRadius":
         case "mTBlRadius":
         case "mTBuRadius":
@@ -226,7 +269,7 @@ namespace TowerEditorApp
           Tmp.AttackRadius = (int)TmpValue;
           break;
         #endregion
-        #region Число целей
+        #region Number of targets
         case "mTBNumberOfTargets":
           /*case "mTBlNumberOfTargets":
            case "mTBuNumberOfTargets":*/
@@ -235,7 +278,7 @@ namespace TowerEditorApp
           Tmp.NumberOfTargets = (int)TmpValue;
           break;
         #endregion
-        #region Шанс на критическую атаку
+        #region Critical chance
         case "mTBCritChance":
           /*case "mTBlCritChance":
            case "mTBuCritChance":*/
@@ -245,14 +288,13 @@ namespace TowerEditorApp
             Tmp.CritChance = (byte)TmpValue;
           break;
         #endregion
-        #region Период до новой атаки
+        #region Attack Cooldown
         case "mTBCooldown":
         case "mTBlCooldown":
         case "mTBuCooldown":
           TmpValue = Tmp.Cooldown;
           ValidateAndChange((sender as MaskedTextBox).Text, ref TmpValue);
           Tmp.Cooldown = (int)TmpValue;
-          //MessageBox.Show(index.ToString() + "\n" + TowerConfig.UpgradeParams.Count.ToString());
           break;
         #endregion
       }
@@ -260,7 +302,11 @@ namespace TowerEditorApp
       #endregion
     }
 
-    //Проверить значение и при успешном результате изменить
+    /// <summary>
+    /// Validates the value and if valid change.
+    /// </summary>
+    /// <param name="TextForValidate">The text for validate.</param>
+    /// <param name="ValueToChange">The value to change.</param>
     private void ValidateAndChange(string TextForValidate, ref object ValueToChange)
     {
       Type ValueType = ValueToChange.GetType();
@@ -279,8 +325,8 @@ namespace TowerEditorApp
       else if (ValueType == typeof(double))
       {
         double Tmp = Convert.ToDouble(ValueToChange);
-        double.TryParse(TextForValidate.Replace('.', 
-          Convert.ToChar(System.Globalization.CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator)), out Tmp);
+        double.TryParse(TextForValidate.Replace('.',
+          Convert.ToChar(CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator)), out Tmp);
         ValueToChange = Tmp;
       }
       else
@@ -288,14 +334,22 @@ namespace TowerEditorApp
     }
     #endregion
 
-    #region Изменение состояния RadioButton'ов и CheckBox'ов
-    //Установление эффекта
+    #region  RadioButtons and CheckBoxes changing
+    /// <summary>
+    /// Attack modificator changing
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
     private void RBNoEffect_Click(object sender, EventArgs e)
     {
       TowerConfig.Modificator = (eModificatorName)Convert.ToInt32((sender as RadioButton).Tag);
     }
 
-    //Установление TrueSight свойства
+    /// <summary>
+    /// True Sight parametr changing
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
     private void CBTrueSight_CheckedChanged(object sender, EventArgs e)
     {
       if (!RealChange)
@@ -303,13 +357,21 @@ namespace TowerEditorApp
       TowerConfig.TrueSight = CBTrueSight.Checked;
     }
 
-    //Выбор типа башни
+    /// <summary>
+    /// Tower type changing
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
     private void RBSimpleTower_Click(object sender, EventArgs e)
     {
       TowerConfig.TowerType = (eTowerType)Convert.ToInt32((sender as RadioButton).Tag);
     }
 
-    //On/Off критического удара
+    /// <summary>
+    /// Critical strike parametr changing
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
     private void CBEnableCrit_CheckedChanged(object sender, EventArgs e)
     {
       if (!RealChange)
@@ -327,16 +389,19 @@ namespace TowerEditorApp
     }
     #endregion
 
-    #region Работа с Limited обновлением
-    //Добавление нового Limited уровня обновления
-    //Не делаем проверку на то можно добавить или нет, т.к логикой Enabled невозможно попасть сюда в некорректном состоянии
+    #region Working with limited upgrading
+    /// <summary>
+    /// Adds new limited upgrade
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
     private void BlAddUp_Click(object sender, EventArgs e)
     {
       if (CurrentUpLevel == -1)
         CurrentUpLevel = 0;
       AddNewUpLevel(TowerConfig.UpgradeParams[0].AttackRadius, 45, ++CurrentUpLevel);
       LimitedShow(CurrentUpLevel);
-      GBLimitedUp.Text = "Limited upgrade " + CurrentUpLevel.ToString() + "/" + (TowerConfig.UpgradeParams.Count - 1).ToString();
+      GBLimitedUp.Text = "Limited upgrade " + CurrentUpLevel.ToString(CultureInfo.InvariantCulture) + "/" + (TowerConfig.UpgradeParams.Count - 1).ToString(CultureInfo.InvariantCulture);
       if (TowerConfig.UpgradeParams.Count == 2)
       {
         BlRemoveUp.Enabled = true;
@@ -348,14 +413,18 @@ namespace TowerEditorApp
       }
     }
 
-    //Удаление Limited up уровня
+    /// <summary>
+    /// Removes current limited upgrade
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
     private void BlRemoveUp_Click(object sender, EventArgs e)
     {
       TowerConfig.UpgradeParams.RemoveAt(CurrentUpLevel--);
       if ((CurrentUpLevel == 0) && (TowerConfig.UpgradeParams.Count != 1))
         CurrentUpLevel = 1;
       LimitedShow(CurrentUpLevel);
-      GBLimitedUp.Text = "Limited upgrade " + CurrentUpLevel.ToString() + "/" + (TowerConfig.UpgradeParams.Count - 1).ToString();
+      GBLimitedUp.Text = "Limited upgrade " + CurrentUpLevel.ToString(CultureInfo.InvariantCulture) + "/" + (TowerConfig.UpgradeParams.Count - 1).ToString(CultureInfo.InvariantCulture);
       if (TowerConfig.UpgradeParams.Count == 1)
       {
         BlRemoveUp.Enabled = false;
@@ -368,7 +437,11 @@ namespace TowerEditorApp
       }
     }
 
-    //Переключение Limited up вперёд
+    /// <summary>
+    /// Going to Next limited upgrade
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
     private void BlNextUp_Click(object sender, EventArgs e)
     {
       CurrentUpLevel++;
@@ -379,7 +452,11 @@ namespace TowerEditorApp
       LimitedShow(CurrentUpLevel);
     }
 
-    //Переключение Limited up назад
+    /// <summary>
+    /// Going to Previous limited upgrade
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
     private void BlPreviousUp_Click(object sender, EventArgs e)
     {
       CurrentUpLevel--;
@@ -391,8 +468,12 @@ namespace TowerEditorApp
     }
     #endregion
 
-    #region Загрузка изображения башни
-    //загрузка иконки башни для магазина
+    #region Pictures loading
+    /// <summary>
+    /// Loads tower icon for shop
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
     private void BLoadTowerIcon_Click(object sender, EventArgs e)
     {
       OFDialog.Filter = "Bitmap|*.bmp|Png picture|*.png";
@@ -405,12 +486,16 @@ namespace TowerEditorApp
         }
         catch (Exception exp)
         {
-          MessageBox.Show("Ошибка при загрузке изображения: " + exp.Message);
+          MessageBox.Show("Picture loading error: " + exp.Message);
         }
       }
     }
 
-    //Загрузка изображения башни на карте
+    /// <summary>
+    /// Loads tower picture for rendering on the map
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
     private void BLoadTowerBitmap_Click(object sender, EventArgs e)
     {
       OFDialog.Filter = "Bitmap|*.bmp|Png picture|*.png";
@@ -426,14 +511,19 @@ namespace TowerEditorApp
         }
         catch (Exception exp)
         {
-          MessageBox.Show("Ошибка при загрузке изображения: " + exp.Message);
+          MessageBox.Show("Picture loading error: " + exp.Message);
         }
       }
     }
     #endregion
 
-    #region Выбор цветов для отрисовки снаряда
-    //Выбор Pen цвета отрисовки снаряда
+    #region Color selection for missle rendering
+
+    /// <summary>
+    /// Pen color selection
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
     private void BSelectPenColor_Click(object sender, EventArgs e)
     {
       if (CDSelect.ShowDialog() == DialogResult.OK)
@@ -446,7 +536,11 @@ namespace TowerEditorApp
       }
     }
 
-    //Выбор Brush цвета отрисовки снаряда
+    /// <summary>
+    /// Brush color selection
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
     private void BSelectBrushColor_Click(object sender, EventArgs e)
     {
       if (CDSelect.ShowDialog() == DialogResult.OK)
@@ -461,11 +555,15 @@ namespace TowerEditorApp
     #endregion
 
     #region Save/Load
-    //Сохранение
+    /// <summary>
+    /// Tower configuration saving
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
     private void BSave_Click(object sender, EventArgs e)
     {
       SFDialog.FileName = "*.tdtc";
-      SFDialog.Filter = "Файл конфигурации башни|*.tdtc";
+      SFDialog.Filter = "Tower configuration|*.tdtc";
       if (SFDialog.ShowDialog() == DialogResult.OK)
       {
         using (FileStream TowerConfSaveStream = new FileStream(SFDialog.FileName, FileMode.Create, FileAccess.Write))
@@ -477,21 +575,21 @@ namespace TowerEditorApp
           }
           catch (Exception Exc)
           {
-            MessageBox.Show("Невохможно сохранить конфигурацию: \n" + Exc.Message);
+            MessageBox.Show("Tower configuration saving error: \n" + Exc.Message);
           }
         }
-        /*finally
-        {
-          TowerConfSaveStream.Close();
-        }*/
       }
     }
 
-    //Загрузка
+    /// <summary>
+    /// Tower configuration loading
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
     private void BLoad_Click(object sender, EventArgs e)
     {
       OFDialog.FileName = "*.tdtc";
-      OFDialog.Filter = "Файл конфигурации башни|*.tdtc";
+      OFDialog.Filter = "Tower configuration|*.tdtc";
       if (OFDialog.ShowDialog() == DialogResult.OK)
       {
         using (FileStream TowerConfLoadStream = new FileStream(OFDialog.FileName, FileMode.Open, FileAccess.Read))
@@ -504,53 +602,59 @@ namespace TowerEditorApp
           }
           catch (Exception Exc)
           {
-            MessageBox.Show("Невохможно загрузить конфигурацию: \n" + Exc.Message);
+            MessageBox.Show("Tower configuration loading error: \n" + Exc.Message);
           }
         }
       }
     }
     #endregion
 
-    //Создание новой башни
+    /// <summary>
+    /// New tower creating
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
     private void BNewTowerConf_Click(object sender, EventArgs e)
     {
       TowerConfig = new TowerParam();
       SetParams();
     }
 
-    //Установление параметров при загрузке/создании новой игры
+    /// <summary>
+    /// Sets the tower parametrs on creating/loading tower configuration
+    /// </summary>
     public void SetParams()
     {
       GBTowerConf.Enabled = true;
       BSave.Enabled = true;
 
       RealChange = false;
-      #region Текстовые поля
+      #region Text fields
       //Critical strike
-      mTBCritChance.Text = TowerConfig.UpgradeParams[0].CritChance.ToString();
-      TBCritMultiple.Text = TowerConfig.UpgradeParams[0].CritMultiple.ToString();
+      mTBCritChance.Text = TowerConfig.UpgradeParams[0].CritChance.ToString(CultureInfo.InvariantCulture);
+      TBCritMultiple.Text = TowerConfig.UpgradeParams[0].CritMultiple.ToString(CultureInfo.InvariantCulture);
       //cost
-      mTBCost.Text = TowerConfig.UpgradeParams[0].Cost.ToString();
+      mTBCost.Text = TowerConfig.UpgradeParams[0].Cost.ToString(CultureInfo.InvariantCulture);
       mTBlCost.Text = "40";
       mTBuCost.Text = "40";
       //damadge
-      mTBDamage.Text = TowerConfig.UpgradeParams[0].Damage.ToString();
+      mTBDamage.Text = TowerConfig.UpgradeParams[0].Damage.ToString(CultureInfo.InvariantCulture);
       mTBlDamage.Text = "50";
       mTBuDamage.Text = "50";
       //cooldown
-      mTBCooldown.Text = TowerConfig.UpgradeParams[0].Cooldown.ToString();
+      mTBCooldown.Text = TowerConfig.UpgradeParams[0].Cooldown.ToString(CultureInfo.InvariantCulture);
       mTBlCooldown.Text = "45";
       mTBuCooldown.Text = "0";
       //radius
-      mTBRadius.Text = TowerConfig.UpgradeParams[0].AttackRadius.ToString();
+      mTBRadius.Text = TowerConfig.UpgradeParams[0].AttackRadius.ToString(CultureInfo.InvariantCulture);
       mTBlRadius.Text = "100";
       mTBuRadius.Text = "0";
       //NumberofTargets
-      mTBNumberOfTargets.Text = TowerConfig.UpgradeParams[0].NumberOfTargets.ToString();
+      mTBNumberOfTargets.Text = TowerConfig.UpgradeParams[0].NumberOfTargets.ToString(CultureInfo.InvariantCulture);
       #endregion
 
       #region Checkboxs and RadioButtons
-      switch (TowerConfig.Modificator)//Установка модификатора
+      switch (TowerConfig.Modificator)//Attack modificator
       {
         case eModificatorName.NoEffect:
           RBNoEffect.Checked = true;
@@ -568,19 +672,19 @@ namespace TowerEditorApp
       CurrentUpLevel = -1;
       GBLimitedUp.Enabled = false;
       GBUnlimitedUp.Enabled = false;
-      if (TowerConfig.UnlimitedUp)//Тип обновления - бесконечный
+      if (TowerConfig.UnlimitedUp)//Upgrade type - Unlimited
       {
         RBUnlimitedUp.Checked = true;
         GBUnlimitedUp.Enabled = true;
         GBUpType.Tag = 0;
         UnlimitedShow();
       }
-      else if (TowerConfig.UpgradeParams.Count == 1)//Без обновления
+      else if (TowerConfig.UpgradeParams.Count == 1)//No upgrade
       {
         RBNoUp.Checked = true;
         GBUpType.Tag = 2;
       }
-      else//Тип обновления - ограниченный
+      else//Upgrade type - Limited
       {
         RBLimitedUp.Checked = true;
         GBLimitedUp.Enabled = true;
@@ -593,7 +697,7 @@ namespace TowerEditorApp
         }
         LimitedShow(CurrentUpLevel = 1);
       }
-      switch (TowerConfig.TowerType)//Тип башни
+      switch (TowerConfig.TowerType)//Tower type
       {
         case eTowerType.Simple:
           RBSimpleTower.Checked = true;
@@ -602,10 +706,7 @@ namespace TowerEditorApp
           RBSplashTower.Checked = true;
           break;
       }
-      if (TowerConfig.UpgradeParams[0].CritMultiple == 0)//Проверка на критический урон
-        CBEnableCrit.Checked = false;
-      else
-        CBEnableCrit.Checked = true;
+      CBEnableCrit.Checked = TowerConfig.UpgradeParams[0].CritMultiple >= 0.001;//Critical strike
       PCriticalStrikeSettings.Enabled = CBEnableCrit.Checked;
       CBTrueSight.Checked = TowerConfig.TrueSight;
       #endregion
@@ -613,15 +714,13 @@ namespace TowerEditorApp
       #region Pictures
       PBTowerBitmap.Image = TowerConfig.UpgradeParams[0].Picture;
       PBTowerIcon.Image = TowerConfig.Icon;
-      //Сначал для Pen color
+      //Pen color
       Bitmap Tmp = new Bitmap(PBMisslePenColor.Width, PBMisslePenColor.Height);
       Graphics Canva = Graphics.FromImage(Tmp);
       Canva.FillRectangle(new SolidBrush(TowerConfig.MisslePenColor),
         new Rectangle(0, 0, Tmp.Width, Tmp.Height));
       PBMisslePenColor.Image = Tmp;
-      //затем для brush color
-      //Пересоздание для того, чтобы Canva указывал на разные Bitmap
-      //и соответсвенно отображал нужный цвет
+      //brush color
       Tmp = new Bitmap(PBMissleBrushColor.Width, PBMissleBrushColor.Height);
       Canva = Graphics.FromImage(Tmp);
       Canva.FillRectangle(new SolidBrush(TowerConfig.MissleBrushColor),
@@ -632,28 +731,35 @@ namespace TowerEditorApp
       RealChange = true;
     }
 
-    //Получение индекса для уровня башни по имени maskedTextBox'а
-    private int GetIndexByName(string Name)
+    /// <summary>
+    /// Gets current index of tower level
+    /// </summary>
+    /// <param name="name">The name.</param>
+    /// <returns></returns>
+    private int GetIndexByName(string name)
     {
-      if (Name.IndexOf("mTBl") != -1)//Если мы попали сюда из LimitedUpgrade
+      if (name.IndexOf("mTBl", StringComparison.Ordinal) != -1)//LimitedUpgrade
         return CurrentUpLevel;
-      else if (Name.IndexOf("mTBu") != -1)//из UnlimitedUpgrade
+      else if (name.IndexOf("mTBu", StringComparison.Ordinal) != -1)//UnlimitedUpgrade
         return 1;
-      else//Если это первоначальные настройки
+      else//Main parametrs
         return 0;
     }
 
-    //Добавление нового обновления
-    //Если без параметров(т.е всё по умолчанию), то добавление unlimitedUp конфигурации
+    /// <summary>
+    /// Adds the new up level.
+    /// </summary>
+    /// <param name="Radius">The radius.</param>
+    /// <param name="Cooldown">The cooldown.</param>
+    /// <param name="InsertPos">The insert pos.</param>
     public void AddNewUpLevel(int Radius = 0, int Cooldown = 0, int InsertPos = 1)
     {
       sMainTowerParam AddValue = sMainTowerParam.CreateDefault();
       AddValue.AttackRadius = Radius;
       AddValue.Cooldown = Cooldown;
-      AddValue.Cost = TowerConfig.UpgradeParams[0].Cost;//По умолчанию стоимость для нового уровня и урон равны
-      //базовым значениям
+      AddValue.Cost = TowerConfig.UpgradeParams[0].Cost;//by deafult
       AddValue.Damage = TowerConfig.UpgradeParams[0].Damage;
-      #region Пока не изменяется с уровнем, чтобы не переписывать TTower если понадобится перепишем лишь редактор
+      #region Currently it's don't change with level, wrote for future
       AddValue.CritChance = TowerConfig.UpgradeParams[0].CritChance;
       AddValue.CritMultiple = TowerConfig.UpgradeParams[0].CritMultiple;
       AddValue.NumberOfTargets = TowerConfig.UpgradeParams[0].NumberOfTargets;
@@ -661,10 +767,15 @@ namespace TowerEditorApp
       TowerConfig.UpgradeParams.Insert(InsertPos, AddValue);
     }
 
-    [Obsolete("Использовалось для того чтобы центрировать изображение иконки")]
-    //1-Icon only
-    //2-Picture only
-    //3-Icon and Picture
+    /// <summary>
+    /// Shows centered pictures.
+    /// </summary>
+    /// <param name="ShowingType">
+    ///1-Icon only
+    ///2-Picture only
+    ///3-Icon and Picture
+    /// </param>
+    [Obsolete("Currently is useless")]
     private void ShowPictures(byte ShowingType)
     {
       switch (ShowingType)
